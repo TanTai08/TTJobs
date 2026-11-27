@@ -38,10 +38,11 @@ LIMIT 5;
 | --- | --- |
 | `POST /api/auth/login` | `200` kèm JWT khi thông tin hợp lệ, `401` khi sai thông tin và `400` khi dữ liệu gửi lên không hợp lệ. |
 | `GET /api/jobs` và `GET /api/jobs/search` | `200` cho truy vấn, lọc địa điểm và phân trang hợp lệ, danh sách rỗng khi không có kết quả, `400` với kích thước trang ngoài giới hạn. |
+| `GET /api/jobs/count` | `200` với `{"total": ...}` cho tổng số tin công khai đang mở. Dùng `page` bắt đầu từ 0 và `size` tối đa 100 để duyệt danh sách trong `GET /api/jobs`. |
 | `GET /api/saved-jobs` | Chỉ trả danh sách của ứng viên đang đăng nhập. |
 | `POST /api/saved-jobs/{jobId}` | `200` khi lưu thành công, `404` khi không tìm thấy việc và `409` khi lưu trùng, kể cả các yêu cầu đồng thời. |
 | `DELETE /api/saved-jobs/{jobId}` | `200` khi bỏ lưu thành công và `404` khi việc chưa được lưu bởi ứng viên đó. |
 
 Dùng JWT từ API đăng nhập trong header `Authorization: Bearer <token>` khi gọi API lưu việc. Trước khi chạy `mvnw.cmd test`, trỏ các biến datasource sang database thử nghiệm riêng vì các bài kiểm thử tích hợp ghi dữ liệu.
 
-Đã kiểm tra các luồng trên bằng HTTP với Java 17 và PostgreSQL 17.12. Cả 28 kiểm tra đều đạt. Trong bài thử gửi 8 yêu cầu đồng thời lưu cùng một việc, một yêu cầu trả `200`, bảy yêu cầu trả `409` và chỉ có một bản ghi được lưu. Flyway áp dụng đủ 42 migration trên database trống, xác thực lại khi khởi động lại và dừng khi gặp schema có bảng nhưng thiếu lịch sử Flyway.
+Đã kiểm tra các luồng trên bằng HTTP với Java 17 và PostgreSQL 17.12. Cả 33 kiểm tra đều đạt. API đếm đúng 300 tin công khai, phân trang trả đủ 300 ID duy nhất khi sắp xếp theo ngày đăng hoặc theo hai chiều lương, và lọc Công nghệ thông tin trả 25 tin. Trong bài thử gửi 8 yêu cầu đồng thời lưu cùng một việc, một yêu cầu trả `200`, bảy yêu cầu trả `409` và chỉ có một bản ghi được lưu. Flyway áp dụng đủ 42 migration trên database trống, xác thực lại khi khởi động lại và dừng khi gặp schema có bảng nhưng thiếu lịch sử Flyway.

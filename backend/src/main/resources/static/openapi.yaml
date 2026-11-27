@@ -574,6 +574,24 @@ paths:
                 $ref: '#/components/schemas/JobDTO'
         "403":
           description: Forbidden
+  /api/jobs/count:
+    get:
+      tags: [Jobs]
+      summary: Count open public jobs
+      responses:
+        "200":
+          description: Total number of public jobs currently open
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total]
+                properties:
+                  total:
+                    type: integer
+                    format: int64
+                    minimum: 0
+
   /api/jobs/highlights:
     get:
       tags: [Jobs]

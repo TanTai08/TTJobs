@@ -118,6 +118,15 @@ class JobControllerApiTest {
     }
 
     @Test
+    void countPublicJobs_shouldReturnTotal() throws Exception {
+        when(jobService.countPublicJobs()).thenReturn(300L);
+
+        mockMvc.perform(get("/api/jobs/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(300));
+    }
+
+    @Test
     void getHighlightedJobs_shouldReturnList() throws Exception {
         JobDTO dto = new JobDTO();
         dto.setId(5L);

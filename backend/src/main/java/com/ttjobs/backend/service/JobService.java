@@ -78,6 +78,12 @@ public class JobService {
                 salaryMin, salaryMax, null, sort, page, size);
     }
 
+    public long countPublicJobs() {
+        return jobRepository.count(JobSpecifications.activeJobs()
+                .and(JobSpecifications.companyVerified())
+                .and(JobSpecifications.statusEquals(OPEN)));
+    }
+
     public List<JobDTO> getHighlightedJobs(String type, Integer size) {
         String normalizedType = (type == null || type.isBlank()) ? "high_salary" : type.trim().toLowerCase();
         if (!"high_salary".equals(normalizedType)) {
@@ -356,13 +362,15 @@ public class JobService {
                     Sort.Order.desc("salaryMax"),
                     Sort.Order.desc("salary"),
                     Sort.Order.desc("salaryMin"),
-                    Sort.Order.desc("postedDate")
+                    Sort.Order.desc("postedDate"),
+                    Sort.Order.desc("id")
             );
             case "salary_low", "salary_asc" -> Sort.by(
                     Sort.Order.asc("salaryMin"),
                     Sort.Order.asc("salary"),
                     Sort.Order.asc("salaryMax"),
-                    Sort.Order.desc("postedDate")
+                    Sort.Order.desc("postedDate"),
+                    Sort.Order.desc("id")
             );
             default -> Sort.by(Sort.Order.desc("postedDate"), Sort.Order.desc("id"));
         };

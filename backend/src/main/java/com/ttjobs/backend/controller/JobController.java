@@ -44,6 +44,11 @@ public class JobController {
                 salaryMin, salaryMax, sort, page, size);
     }
 
+    @GetMapping("/count")
+    public Map<String, Long> countPublicJobs() {
+        return Map.of("total", jobService.countPublicJobs());
+    }
+
     @GetMapping("/highlights")
     public List<JobDTO> getHighlightedJobs(@RequestParam(required = false, defaultValue = "high_salary") String type,
             @RequestParam(required = false, defaultValue = "12") @Min(1) Integer size) {
