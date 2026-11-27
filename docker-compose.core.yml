@@ -1,0 +1,16 @@
+# Use alongside docker-compose.prod.yml to deploy the modules in this checkout.
+services:
+  ai-service:
+    profiles: [ai]
+  backend:
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      TTJOBS_AI_BASE_URL: http://localhost:8000
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+  nginx:
+    ports: !override
+      - "127.0.0.1:${HTTP_PORT:-8088}:80"
