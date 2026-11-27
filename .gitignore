@@ -1,0 +1,77 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+*.safetensors
+
+### VS Code ###
+.vscode/
+ai-service/
+
+### Logs and local dumps ###
+*.log
+hs_err_pid*.log
+replay_pid*.log
+*.dump
+*.dumpstream
+
+### Secrets ###
+.env
+.env.*
+!.env.example
+!.env.*.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.*.example
+backend/src/main/resources/application-secret.properties
+backend/src/main/resources/cloudinary.properties
+backend/src/main/resources/*secret*.properties
+
+### Certificates / private keys ###
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+### Provider credentials ###
+*credentials*.json
+*service-account*.json
+google-credentials*.json
+.cloudflared/
+cloudflared*.json
+
+### Large/private model artifacts ###
+*.pt
+*.pth
+*.onnx
