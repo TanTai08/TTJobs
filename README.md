@@ -14,6 +14,8 @@ Requirements:
 - Redis optional for realtime broker
 - Python 3.11 if running `ai-service` locally
 
+See [Backend PostgreSQL and Flyway setup](docs/BACKEND_DATABASE.md) for database configuration and API verification.
+
 Common commands:
 
 ```bash
