@@ -7,13 +7,16 @@ import com.ttjobs.backend.entity.SavedJob;
 import com.ttjobs.backend.entity.User;
 import com.ttjobs.backend.repository.JobRepository;
 import com.ttjobs.backend.repository.SavedJobRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +50,23 @@ class SavedJobServiceTest {
                 () -> savedJobService.saveJob(10L));
 
         assertEquals(409, ex.getStatusCode().value());
+    }
+
+    @Test
+    void saveJob_shouldReturnConflict_whenAnotherRequestSavedFirst() {
+        when(authContextService.requireCurrentUser()).thenReturn(user(1L, User.Role.CANDIDATE));
+        when(jobRepository.findByIdAndDeletedAtIsNull(10L))
+                .thenReturn(Optional.of(job(10L, "Java Developer", "open")));
+        var violation = new ConstraintViolationException("duplicate key", new SQLException(),
+                "uq_saved_jobs_user_job");
+        when(savedJobRepository.save(any(SavedJob.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate key", violation));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> savedJobService.saveJob(10L));
+
+        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Job already saved", ex.getReason());
     }
 
     @Test

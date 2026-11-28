@@ -6,7 +6,9 @@ import com.ttjobs.backend.entity.SavedJob;
 import com.ttjobs.backend.entity.User;
 import com.ttjobs.backend.repository.JobRepository;
 import com.ttjobs.backend.repository.SavedJobRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,7 +47,16 @@ public class SavedJobService {
         savedJob.setUser(currentUser);
         savedJob.setJob(job);
 
-        SavedJob saved = savedJobRepository.save(savedJob);
+        SavedJob saved;
+        try {
+            saved = savedJobRepository.save(savedJob);
+        } catch (DataIntegrityViolationException ex) {
+            if (ex.getCause() instanceof ConstraintViolationException violation
+                    && "uq_saved_jobs_user_job".equals(violation.getConstraintName())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Job already saved", ex);
+            }
+            throw ex;
+        }
         recordAiEvent(currentUser, job, "job_saved");
         return toDto(saved);
     }
