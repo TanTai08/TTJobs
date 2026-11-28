@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -40,3 +43,49 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: admin
         run: ./mvnw -q test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  core-smoke:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_DB: ttjobs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ci-postgres-password
+      JWT_SECRET: ci-only-ttjobs-secret-at-least-32-chars
+      HTTP_PORT: 8088
+      TTJOBS_APP_BASE_URL: http://127.0.0.1:8088
+      TTJOBS_CORS_ALLOWED_ORIGINS: http://127.0.0.1:8088
+      COMPOSE_FILE: docker-compose.prod.yml:docker-compose.core.yml
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Start core services
+        run: docker compose up --detach --build --wait --wait-timeout 180
+      - name: Check frontend and API
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8088/ > /tmp/ttjobs-index.html
+          grep -q 'TTJobs' /tmp/ttjobs-index.html
+          curl --fail --silent --show-error http://127.0.0.1:8088/api/jobs | jq -e 'type == "array"'
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 100
+      - name: Stop test services
+        if: always()
+        run: docker compose down --volumes

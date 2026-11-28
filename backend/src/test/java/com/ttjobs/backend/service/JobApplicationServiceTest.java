@@ -64,9 +64,11 @@ class JobApplicationServiceTest {
     @Test
     void applyForJob_shouldReturnConflict_whenDuplicateApplication() {
         User currentUser = user(1L, User.Role.CANDIDATE);
+        JobApplication existingApplication = new JobApplication();
+        existingApplication.setStatus("submitted");
         when(authContextService.requireCurrentUser()).thenReturn(currentUser);
         when(jobApplicationRepository.findByUserIdAndJobId(1L, 10L))
-                .thenReturn(Optional.of(new JobApplication()));
+                .thenReturn(Optional.of(existingApplication));
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> jobApplicationService.applyForJob(10L, null, true, false));
